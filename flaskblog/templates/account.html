@@ -1,4 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
-	<h1> {{ current_user.username }}</h1>
+	<div class="content-section">
+  		
+    	<h2 class="account-heading">{{ current_user.username }}
+    	</h2>
+      		<p class="text-secondary">{{ current_user.email }}
+      		</p>
+    		
+  <!-- FORM HERE -->
+	</div>
 {% endblock content %}

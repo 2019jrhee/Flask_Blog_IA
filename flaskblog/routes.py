@@ -1,25 +1,17 @@
 from flask import render_template, url_for, flash, redirect, request
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm 
+from flaskblog.forms import RegistrationForm, LoginForm, PostForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
-# dummy data for test
-posts = [
-
-	{ 'author': 'Michelle Rhee',
-	  'title': 'Post 1',
-	  'content': 'First content',
-	  'date_posted': 'March 30, 2018'
-
-	}
-]
 
 @app.route("/")
 @app.route("/home")
 
 def home():
-    return render_template('home.html', posts = posts)
+	# grabbing all the post from the database
+	posts = Post.query.all()
+	return render_template ('home.html', posts=posts)
 
 # getting user input and save it in database
 @app.route("/register", methods=['GET', 'POST'])
@@ -50,7 +42,7 @@ def login():
 		if user and bcrypt.check_password_hash(user.password, form.password.data):
 			login_user(user)
 			next_page = request.args.get('next')
-			if next page exists then redirect to that page, but if not, redirect to the home page
+			#if next page exists then redirect to that page, but if not, redirect to the home page
 			return redirect(next_page) if next_page else redirect(url_for('home'))
 		#if it does not match, it will simply show the message
 		else:
@@ -68,7 +60,22 @@ def logout():
 @app.route("/account")
 @login_required
 def account():
+
 	return render_template ('account.html', title= 'Account')
+
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def new_post():
+	form = PostForm()
+	if form.validate_on_submit():
+		post = Post(title=form.title.data, content=form.content.data, author=current_user)
+		# adding the post to the database
+		db.session.add(post)
+		db.session.commit()
+		flash('Your post has been created!', 'success' )
+		return redirect(url_for('home'))
+	return render_template ('create_post.html', title= 'New Post', form=form)
 
 
 
